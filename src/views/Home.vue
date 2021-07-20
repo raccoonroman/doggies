@@ -1,44 +1,69 @@
 <template>
   <div class="container">
-    <DogsFilter />
-
-    {{ breeds }}
-
-    <div class="breeds-grid">
-      <ul v-if="randomImages.length" class="breeds-grid__list">
-        <li
-          v-for="(url, i) in randomImages"
-          :key="`${i}${url}`"
-          class="breeds-grid__item"
+    <div class="filter">
+      <div class="filter__row">
+        <button
+          type="button"
+          class="filter__breeds-btn"
+          :class="{ active: isBreedsNamesShown }"
+          @click="isBreedsNamesShown = !isBreedsNamesShown"
         >
-          <article class="breed-card">
-            <button class="breed-card__heart-btn" type="button">
-              <span class="visually-hidden">Добавить в избранное</span>
-            </button>
-            <a href="#" class="breed-card__link">
-              <img :src="url" :alt="getBreedByUrl(url)">
-              <h3 class="breed-card__title">{{ getBreedByUrl(url) }}</h3>
-            </a>
-          </article>
-        </li>
-      </ul>
-      <p class="breeds-grid__stub" v-if="loadStatus === 'pending'">
-        Загрузка...
-      </p>
+          Породы
+        </button>
+        <div class="filter__sorting">
+          <input
+            id="sorting"
+            v-model="isSortedAlphabetically"
+            type="checkbox"
+            class="visually-hidden"
+          >
+          <label for="sorting">Сортировка по алфавиту</label>
+        </div>
+      </div>
+
+      <div
+        v-show="isBreedsNamesShown && randomImages.length"
+        class="filter__breed-names"
+      >
+        <template v-for="breed in breeds">
+          <input
+            :id="breed"
+            :key="`${breed}input`"
+            v-model="selectedBreeds"
+            class="visually-hidden"
+            type="checkbox"
+            :value="breed"
+          >
+          <label :key="`${breed}label`" :for="breed">
+            {{ breed }}
+          </label>
+        </template>
+      </div>
     </div>
+
+    <DogsGrid
+      :items="filteredImages"
+      :load-status="loadStatus"
+    />
   </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import DogsFilter from '../components/filter.vue';
+import DogsGrid from '../components/dogs-grid.vue';
 
 export default {
   components: {
-    DogsFilter,
+    DogsGrid,
   },
+  data: () => ({
+    isBreedsNamesShown: false,
+    isSortedAlphabetically: false,
+    selectedBreeds: [],
+  }),
   created() {
     this.loadRandomImages();
+    this.loadAllBreeds();
   },
   mounted() {
     window.addEventListener('scroll', this.onWindowScroll);
@@ -50,15 +75,28 @@ export default {
     ...mapGetters({
       randomImages: 'randomImages/randomImages',
       loadStatus: 'randomImages/loadStatus',
-      breeds: 'randomImages/breeds',
+      breeds: 'allBreeds/breeds',
     }),
+    sortedImages() {
+      const { isSortedAlphabetically, randomImages } = this;
+      return isSortedAlphabetically ? randomImages.slice().sort() : randomImages;
+    },
+    filteredImages() {
+      if (!this.selectedBreeds.length) {
+        return this.sortedImages;
+      }
+
+      return this.sortedImages.filter((url) => (
+        this.selectedBreeds.some((breed) => url.includes(breed))
+      ));
+    },
   },
   methods: {
     loadRandomImages() {
       this.$store.dispatch('randomImages/loadRandomImages');
     },
-    getBreedByUrl(url) {
-      return url.match(/(?<=breeds\/).+(?=\/)/)[0].replace('-', ' ');
+    loadAllBreeds() {
+      this.$store.dispatch('allBreeds/loadAllBreeds');
     },
     onWindowScroll() {
       if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
@@ -70,38 +108,112 @@ export default {
 </script>
 
 <style lang="scss">
-.breeds-grid {
-  text-align: center;
+.filter {
+  padding: 50px 0;
 
-  &__stub {
-    opacity: 0.5;
+  &__row {
+    display: flex;
+    align-items: center;
   }
 
-  &__list {
-    margin: 0;
-    padding: 0 0 30px;
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-  }
-
-  &__item {
-    height: 290px;
-
-    &:nth-child(10n + 1) {
-      grid-column: 1 / 3;
-    }
-
-    &:nth-child(10n + 7) {
-      grid-column: 2 / 4;
-    }
-  }
-
-  &__load-more-btn {
-    font-size: inherit;
+  &__breeds-btn {
+    position: relative;
+    padding: 0;
+    padding-right: 16px;
+    background-color: transparent;
     border: 0;
     color: #fff;
+    font-size: inherit;
+    line-height: inherit;
+    border-bottom: 1px dashed #fff;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      width: 9px;
+      height: 5px;
+      background-image: url('../assets/select-arrow.svg');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+    }
+
+    &.active::before {
+      transform: translateY(-50%) rotate(180deg);
+    }
+  }
+
+  &__sorting {
+    margin-left: auto;
+  }
+
+  &__sorting label {
+    position: relative;
+    padding: 5px 45px 5px 0;
+    color: #fff;
+    opacity: 0.4;
+    cursor: pointer;
+    transition: opacity 0.2s;
+
+    &:hover,
+    &:focus {
+      opacity: 0.7;
+    }
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 15px;
+      border-radius: 15px;
+      border: 1px solid #fff;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: 18px;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #fff;
+      transition: transform 0.2s;
+    }
+  }
+
+  &__sorting input:checked + label {
+    opacity: 1;
+
+    &::after {
+      transform: translate(16px, -50%)
+    }
+  }
+
+  &__breed-names {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 16px -8px 0;
+  }
+
+  &__breed-names label {
+    display: block;
+    cursor: pointer;
+    margin: 8px;
+    padding: 3px 12px;
+    font-size: 12px;
+    line-height: 16px;
+    color: #fff;
+    text-transform: capitalize;
+    border: 1px solid #fff;
+    border-radius: 20px;
     background-color: transparent;
     opacity: 0.4;
     transition: opacity 0.2s;
@@ -111,78 +223,11 @@ export default {
       opacity: 0.7;
     }
   }
-}
 
-.breed-card {
-  height: 100%;
-  position: relative;
-  border-radius: 8px;
-  overflow: hidden;
-
-  &__heart-btn {
-    position: absolute;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    width: 79px;
-    height: 76px;
-    padding: 0;
-    border: 0;
-    background-color: transparent;
-    background-image: url('../assets/heart-empty.svg');
-    background-size: 29px 26px;
-    background-position: center;
-    background-repeat: no-repeat;
-    transition: transform 0.2s;
-
-    &:hover,
-    &:focus {
-      transform: scale(1.2);
-    }
-
-    &.active {
-      background-image: url('../assets/heart.svg');
-    }
-  }
-
-  &__link {
-    display: block;
-    position: relative;
-    height: 100%;
-    color: inherit;
-    transition: filter 0.2s;
-
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(1.26deg, #000000 -5.53%, transparent 54.45%);
-    }
-  }
-
-  img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  &__title {
-    position: absolute;
-    bottom: 20px;
-    right: 25px;
-    margin: 0;
-    font-weight: 600;
-    font-size: 25px;
-    letter-spacing: 0.01em;
-    text-transform: capitalize;
-  }
-
-  &__link:hover {
-    filter: brightness(120%);
+  &__breed-names input:checked + label {
+    color: #3C59F0;
+    border-color: #3C59F0;
+    opacity: 1;
   }
 }
 </style>
