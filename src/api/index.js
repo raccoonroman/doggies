@@ -1,15 +1,14 @@
 import axios from 'axios';
 
-export default class {
-  constructor() {
-    this.instance = axios.create({ baseURL: 'https://dog.ceo/api' });
-    this.instance.interceptors.response.use(
-      ({ data }) => data.message,
-      (err) => Promise.reject(err),
-    );
-  }
+const instance = axios.create({ baseURL: 'https://dog.ceo/api' });
 
+instance.interceptors.response.use(
+  ({ data }) => data.message,
+  (err) => Promise.reject(err),
+);
+
+export default {
   getRandomImages(amount = 20) {
-    return this.instance.get(`/breeds/image/random/${amount}`);
-  }
-}
+    return instance.get(`/breeds/image/random/${amount}`);
+  },
+};

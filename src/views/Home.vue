@@ -2,50 +2,81 @@
   <div class="container">
     <DogsFilter />
 
+    {{ breeds }}
+
     <div class="breeds-grid">
-      <ul class="breeds-grid__list">
-        <li class="breeds-grid__item">
+      <ul v-if="randomImages.length" class="breeds-grid__list">
+        <li
+          v-for="(url, i) in randomImages"
+          :key="`${i}${url}`"
+          class="breeds-grid__item"
+        >
           <article class="breed-card">
             <button class="breed-card__heart-btn" type="button">
               <span class="visually-hidden">Добавить в избранное</span>
             </button>
             <a href="#" class="breed-card__link">
-              <img src="../assets/dog.jpg" alt="">
-              <h3 class="breed-card__title">Spaniel</h3>
-            </a>
-          </article>
-        </li>
-        <li class="breeds-grid__item">
-          <article class="breed-card">
-            <button class="breed-card__heart-btn" type="button">
-              <span class="visually-hidden">Добавить в избранное</span>
-            </button>
-            <a href="#" class="breed-card__link">
-              <img src="../assets/dog.jpg" alt="">
-              <h3 class="breed-card__title">Spaniel</h3>
+              <img :src="url" :alt="getBreedByUrl(url)">
+              <h3 class="breed-card__title">{{ getBreedByUrl(url) }}</h3>
             </a>
           </article>
         </li>
       </ul>
+      <p class="breeds-grid__stub" v-if="loadStatus === 'pending'">
+        Загрузка...
+      </p>
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import DogsFilter from '../components/filter.vue';
 
 export default {
   components: {
     DogsFilter,
   },
-  async created() {
-    const response = await this.$api.getRandomImages();
+  created() {
+    this.loadRandomImages();
+  },
+  mounted() {
+    window.addEventListener('scroll', this.onWindowScroll);
+  },
+  beforeDestroy() {
+    window.removeEventListener('scroll', this.onWindowScroll);
+  },
+  computed: {
+    ...mapGetters({
+      randomImages: 'randomImages/randomImages',
+      loadStatus: 'randomImages/loadStatus',
+      breeds: 'randomImages/breeds',
+    }),
+  },
+  methods: {
+    loadRandomImages() {
+      this.$store.dispatch('randomImages/loadRandomImages');
+    },
+    getBreedByUrl(url) {
+      return url.match(/(?<=breeds\/).+(?=\/)/)[0].replace('-', ' ');
+    },
+    onWindowScroll() {
+      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+        this.loadRandomImages();
+      }
+    },
   },
 };
 </script>
 
 <style lang="scss">
 .breeds-grid {
+  text-align: center;
+
+  &__stub {
+    opacity: 0.5;
+  }
+
   &__list {
     margin: 0;
     padding: 0 0 30px;
@@ -56,11 +87,28 @@ export default {
   }
 
   &__item {
-    min-height: 290px;
+    height: 290px;
 
     &:nth-child(10n + 1) {
-      grid-column: 1 / -1;
-      min-height: 512px;
+      grid-column: 1 / 3;
+    }
+
+    &:nth-child(10n + 7) {
+      grid-column: 2 / 4;
+    }
+  }
+
+  &__load-more-btn {
+    font-size: inherit;
+    border: 0;
+    color: #fff;
+    background-color: transparent;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+
+    &:hover,
+    &:focus {
+      opacity: 0.7;
     }
   }
 }
@@ -130,22 +178,11 @@ export default {
     font-weight: 600;
     font-size: 25px;
     letter-spacing: 0.01em;
+    text-transform: capitalize;
   }
 
   &__link:hover {
-    // opacity: 0.8;
-    filter: brightness(119%);
-  }
-
-  .breeds-grid__item:nth-child(10n + 1) &__title {
-    font-size: 30px;
-    bottom: 40px;
-    right: 50px;
-  }
-
-  .breeds-grid__item:nth-child(10n + 1) &__heart-btn {
-    top: 10px;
-    left: 10px;
+    filter: brightness(120%);
   }
 }
 </style>

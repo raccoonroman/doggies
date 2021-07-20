@@ -31,7 +31,7 @@
 <script>
 export default {
   data: () => ({
-    isBreedsNamesShown: true,
+    isBreedsNamesShown: false,
   }),
 };
 </script>
