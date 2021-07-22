@@ -1,5 +1,27 @@
 <template>
-  <div>
-    <h1>This is an favorites page</h1>
+  <div class="container favorites">
+    <DogsGrid
+      :items="favorites"
+    />
   </div>
 </template>
+
+<script>
+import { mapGetters } from 'vuex';
+import DogsGrid from '../components/dogs-grid.vue';
+
+export default {
+  components: {
+    DogsGrid,
+  },
+  computed: mapGetters({
+    favorites: 'favorites/favorites',
+  }),
+};
+</script>
+
+<style lang="scss">
+.favorites {
+  padding-top: 100px;
+}
+</style>

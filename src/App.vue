@@ -15,6 +15,12 @@ export default {
     PageHeader,
     BtnScrollTop,
   },
+  beforeCreate() {
+    if (!localStorage.getItem('favorites')) {
+      localStorage.setItem('favorites', JSON.stringify([]));
+    }
+    this.$store.commit('favorites/initialise');
+  },
 };
 </script>
 

@@ -7,7 +7,12 @@
         class="dogs-grid__item"
       >
         <article class="breed-card">
-          <button class="breed-card__heart-btn" type="button">
+          <button
+            type="button"
+            class="breed-card__heart-btn"
+            :class="{ active: favorites.includes(url) }"
+            @click="onHeartBtnClick(url)"
+          >
             <span class="visually-hidden">Добавить в избранное</span>
           </button>
           <router-link :to="getBreedCardHref(url)" class="breed-card__link">
@@ -20,10 +25,14 @@
     <p v-if="loadStatus === 'pending'" class="dogs-grid__stub">
       Загрузка...
     </p>
+    <p v-if="loadStatus !== 'pending' && !items.length" class="dogs-grid__stub">
+      Нету данных.
+    </p>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import loadState from '../const';
 
 export default {
@@ -34,16 +43,22 @@ export default {
     },
     loadStatus: {
       type: String,
-      required: true,
+      required: false,
       validator: (value) => [...Object.values(loadState)].includes(value),
     },
   },
+  computed: mapGetters({
+    favorites: 'favorites/favorites',
+  }),
   methods: {
     getBreedByUrl(url) {
       return url.match(/(?<=breeds\/).+(?=\/)/)[0].replace('-', ' ');
     },
     getBreedCardHref(url) {
       return this.getBreedByUrl(url).split(' ')[0];
+    },
+    onHeartBtnClick(url) {
+      this.$store.commit('favorites/updateFavorites', { url });
     },
   },
 };
