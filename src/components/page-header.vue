@@ -7,7 +7,7 @@
         </router-link>
         <ul class="header__list">
           <li class="header__item header__item--favorites">
-            <router-link to="/favourites">Избранные пёсели</router-link>
+            <router-link to="/favorites">Избранные пёсели</router-link>
           </li>
         </ul>
       </nav>

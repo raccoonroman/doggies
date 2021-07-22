@@ -10,14 +10,14 @@
           <button class="breed-card__heart-btn" type="button">
             <span class="visually-hidden">Добавить в избранное</span>
           </button>
-          <a href="#" class="breed-card__link">
+          <router-link :to="getBreedCardHref(url)" class="breed-card__link">
             <img :src="url" :alt="getBreedByUrl(url)">
             <h3 class="breed-card__title">{{ getBreedByUrl(url) }}</h3>
-          </a>
+          </router-link>
         </article>
       </li>
     </ul>
-    <p class="dogs-grid__stub" v-if="loadStatus === 'pending'">
+    <p v-if="loadStatus === 'pending'" class="dogs-grid__stub">
       Загрузка...
     </p>
   </div>
@@ -41,6 +41,9 @@ export default {
   methods: {
     getBreedByUrl(url) {
       return url.match(/(?<=breeds\/).+(?=\/)/)[0].replace('-', ' ');
+    },
+    getBreedCardHref(url) {
+      return this.getBreedByUrl(url).split(' ')[0];
     },
   },
 };
@@ -72,20 +75,6 @@ export default {
 
     &:nth-child(10n + 7) {
       grid-column: 2 / 4;
-    }
-  }
-
-  &__load-more-btn {
-    font-size: inherit;
-    border: 0;
-    color: #fff;
-    background-color: transparent;
-    opacity: 0.4;
-    transition: opacity 0.2s;
-
-    &:hover,
-    &:focus {
-      opacity: 0.7;
     }
   }
 }
@@ -138,6 +127,10 @@ export default {
       bottom: 0;
       background: linear-gradient(1.26deg, #000000 -5.53%, transparent 54.45%);
     }
+
+    &:hover {
+      filter: brightness(120%);
+    }
   }
 
   img {
@@ -156,10 +149,6 @@ export default {
     font-size: 25px;
     letter-spacing: 0.01em;
     text-transform: capitalize;
-  }
-
-  &__link:hover {
-    filter: brightness(120%);
   }
 }
 </style>

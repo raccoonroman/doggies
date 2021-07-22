@@ -13,18 +13,33 @@ export default {
     loadRandomImages(state, { status, images }) {
       state.loadStatus = status;
       if (status === loadState.RESOLVE) {
+        state.randomImages = images;
+      }
+    },
+    loadMoreRandomImages(state, { status, images }) {
+      state.loadStatus = status;
+      if (status === loadState.RESOLVE) {
         state.randomImages = [...state.randomImages, ...images];
       }
     },
   },
   actions: {
-    async loadRandomImages({ commit }, payload = {}) {
+    async loadRandomImages({ commit }, { breed, amount }) {
       try {
         commit('loadRandomImages', { status: PENDING });
-        const images = await api.getRandomImages(payload.amount);
+        const images = await api.getImagesByBreed(breed, amount);
         commit('loadRandomImages', { status: RESOLVE, images });
       } catch (error) {
         commit('loadRandomImages', { status: REJECT });
+      }
+    },
+    async loadMoreRandomImages({ commit }, { breed, amount }) {
+      try {
+        commit('loadMoreRandomImages', { status: PENDING });
+        const images = await api.getImagesByBreed(breed, amount);
+        commit('loadMoreRandomImages', { status: RESOLVE, images });
+      } catch (error) {
+        commit('loadMoreRandomImages', { status: REJECT });
       }
     },
   },

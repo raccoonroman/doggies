@@ -15,4 +15,8 @@ export default {
   getAllBreeds() {
     return instance.get('/breeds/list');
   },
+
+  getImagesByBreed(breed, amount = 20) {
+    return instance.get(`/breed/${breed}/images/random/${amount}`);
+  },
 };
