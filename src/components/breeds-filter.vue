@@ -14,13 +14,20 @@
     </router-link>
 
     <div v-show="isBreedsNamesShown" class="breeds-filter__names-list">
-      <router-link :to="`/${breed}`" @click.native="isBreedsNamesShown = false"
-        v-for="breed in breeds"
-        :key="breed"
-        class="breeds-filter__name-link"
-      >
-        {{ breed }}
-      </router-link>
+      <template v-for="(breeds, letter) in breedsByAlphabet">
+        <span :key="letter" class="breeds-filter__letter">
+          {{ letter }}
+        </span>
+        <router-link
+          v-for="breed in breeds"
+          :to="`/${breed}`"
+          :key="breed"
+          class="breeds-filter__name-link"
+          @click.native="isBreedsNamesShown = false"
+        >
+          {{ breed }}
+        </router-link>
+      </template>
     </div>
   </div>
 </template>
@@ -41,6 +48,15 @@ export default {
     }),
     breed() {
       return this.$route.params.breed;
+    },
+    breedsByAlphabet() {
+      const { breeds } = this;
+      const letters = [...new Set(breeds.map((breed) => breed[0]))];
+
+      return letters.reduce((acc, letter) => ({
+        ...acc,
+        [letter]: breeds.filter((breed) => breed[0] === letter),
+      }), {});
     },
   },
 };
@@ -98,8 +114,22 @@ export default {
 
   &__names-list {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
     margin: 16px -8px 0;
+  }
+
+  &__letter {
+    margin: 8px;
+    text-transform: uppercase;
+    font-size: 20px;
+    line-height: 28px;
+    color: #fff;
+    opacity: 0.4;
+
+    &:not(:first-of-type) {
+      margin-left: 32px;
+    }
   }
 
   &__name-link {
@@ -121,12 +151,6 @@ export default {
     &:focus {
       opacity: 0.7;
     }
-
-    // &.active {
-    //   color: #3C59F0;
-    //   border-color: #3C59F0;
-    //   opacity: 1;
-    // }
   }
 }
 </style>
