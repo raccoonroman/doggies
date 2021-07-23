@@ -52,9 +52,11 @@ export default {
   }),
   methods: {
     getBreedByUrl(url) {
+      // з урла отримуємо назву породи собаки
       return url.match(/(?<=breeds\/).+(?=\/)/)[0].replace('-', ' ');
     },
     getBreedCardHref(url) {
+      // лінк на перше (головне) ім*я породи собаки
       return this.getBreedByUrl(url).split(' ')[0];
     },
     onHeartBtnClick(url) {

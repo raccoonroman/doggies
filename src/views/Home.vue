@@ -47,6 +47,7 @@ export default {
       loadStatus: 'randomImages/loadStatus',
     }),
     sortedImages() {
+      // сортуємо зображення за за потреби
       const { isSortedAlphabetically, randomImages } = this;
       return isSortedAlphabetically ? randomImages.slice().sort() : randomImages;
     },
@@ -56,7 +57,7 @@ export default {
       this.$store.dispatch('randomImages/loadRandomImages');
     },
     onWindowScroll() {
-      // is scrolled to page bottom
+      // якщо доскролили до низу сторінки
       if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
         this.loadRandomImages();
       }

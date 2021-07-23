@@ -26,6 +26,7 @@ export default {
     window.addEventListener('scroll', this.onWindowScroll);
   },
   beforeRouteUpdate(to, from, next) {
+    // коли наприклад, переходимо з '/pitbull' на '/husky'
     this.loadRandomImages(to.params.breed);
     next();
   },
@@ -46,10 +47,11 @@ export default {
       this.$store.dispatch('imagesByBreed/loadRandomImages', { breed });
     },
     loadMoreRandomImages(breed) {
+      // підгружаємо більше зображень при скролі
       this.$store.dispatch('imagesByBreed/loadMoreRandomImages', { breed });
     },
     onWindowScroll() {
-      // is scrolled to page bottom
+      // якщо доскролили до низу сторінки
       if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
         this.loadMoreRandomImages(this.breed);
       }

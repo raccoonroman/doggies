@@ -16,6 +16,7 @@ export default {
     BtnScrollTop,
   },
   beforeCreate() {
+    // ініціалізація favorites в localstorage
     if (!localStorage.getItem('favorites')) {
       localStorage.setItem('favorites', JSON.stringify([]));
     }
