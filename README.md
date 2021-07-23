@@ -1,5 +1,7 @@
 # arsmoon-test
 
+Node version used `14.17.1`.
+
 ## Project setup
 ```
 npm install
